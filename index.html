@@ -502,9 +502,22 @@
       margin-bottom: 0.5rem;
       align-items: flex-start;
     }
-    .point-row textarea, .obj-row textarea {
+    .obj-row > div {
       flex: 1;
-      min-height: 50px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .point-row textarea, .obj-row textarea {
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 70px;
+      max-height: none;
+      resize: vertical;
+      field-sizing: content;
+      box-sizing: border-box;
+      line-height: 1.4;
     }
     .point-row button, .obj-row button {
       flex-shrink: 0;
