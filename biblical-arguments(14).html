@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biblical Arguments</title>
+  <style>
+    :root {
+      --bg: #f8f5f0;
+      --sidebar: #2c2416;
+      --text: #2c2416;
+      --accent: #8b5e3c;
+      --card: #ffffff;
+      --border: #e0d6c8;
+      --muted: #6b5e4e;
+    }
+    [data-theme="dark"] {
+      --bg: #1a1612;
+      --sidebar: #0f0d0a;
+      --text: #e8e0d5;
+      --accent: #c9a27a;
+      --card: #252019;
+      --border: #3a3228;
+      --muted: #a89880;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Georgia", "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #sidebar {
+      width: 300px;
+      background: var(--sidebar);
+      color: #f0e6d8;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    #sidebar header {
+      padding: 1.4rem 1.2rem;
+      border-bottom: 1px solid #4a3f30;
+      font-size: 1.25rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .close-btn { display: none; }
+    #search {
+      margin: 0.8rem 1rem;
+      padding: 0.55rem 0.8rem;
+      border: none;
+      border-radius: 4px;
+      background: #3a3228;
+      color: #f0e6d8;
+      font-family: inherit;
+      font-size: 16px;
+    }
+    #search::placeholder { color: #a89880; }
+    .category { border-bottom: 1px solid #3a3228; }
+    .category-title {
+      padding: 0.7rem 1.2rem;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .category-title:hover { background: #3a3228; }
+    .category-title::after { content: "▸"; transition: 0.2s; }
+    .category.open .category-title::after { transform: rotate(90deg); }
+    .args { display: none; }
+    .category.open .args { display: block; }
+    .arg-item {
+      padding: 0.7rem 1.2rem 0.7rem 1.8rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      border-left: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+    .arg-item:hover { background: #3a3228; }
+    .arg-item.active {
+      background: #4a3f30;
+      border-left-color: var(--accent);
+    }
+    .arg-item .arg-title { flex: 1; }
+    .arg-item .sidebar-edit {
+      display: none;
+      background: transparent;
+      border: none;
+      color: #c9a27a;
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .arg-item .sidebar-edit:hover { background: #5a4a38; color: #fff; }
+    body.admin-mode .arg-item .sidebar-edit { display: inline-block; }
+    .card-header-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .card-header-actions button {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
+    #main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 2.5rem;
+      -webkit-overflow-scrolling: touch;
+    }
+    #toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .toolbar-right { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    button.theme-btn, button.menu-btn, button.edit-btn, button.action-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.9rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    button.edit-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+    button.edit-btn:hover { opacity: 0.9; }
+    .menu-btn { display: none; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 820px;
+      margin: 0 auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 0.4rem; color: var(--accent); line-height: 1.25; }
+    .refs {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .refs a, .summary a, .card a.bible-ref {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .refs a:hover, .summary a:hover, .card a.bible-ref:hover {
+      opacity: 0.85;
+    }
+    .summary {
+      margin-bottom: 1.8rem;
+      line-height: 1.55;
+      font-size: 1.05rem;
+    }
+    h2 {
+      font-size: 1.15rem;
+      margin: 1.6rem 0 0.7rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.3rem;
+    }
+    ul, ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.55rem; line-height: 1.5; }
+    .objection {
+      background: rgba(139,94,60,0.08);
+      border-left: 4px solid var(--accent);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .reply { margin-top: 0.5rem; }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 4rem;
+      font-size: 1.1rem;
+    }
+    .card-actions {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .card-actions button {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
+    button.danger { background: #8b3a3a; color: #fff; border-color: #8b3a3a; }
+
+    /* Editor modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--card);
+      color: var(--text);
+      border-radius: 8px;
+      max-width: 640px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.5rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .modal h2 {
+      margin-top: 0;
+      color: var(--accent);
+      border: none;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+      font-size: 0.95rem;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+    .form-group .hint {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .points-list, .objections-list {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.6rem;
+      background: var(--bg);
+    }
+    .point-row, .obj-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+      align-items: flex-start;
+    }
+    .point-row textarea, .obj-row textarea {
+      flex: 1;
+      min-height: 50px;
+    }
+    .point-row button, .obj-row button {
+      flex-shrink: 0;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+      background: #8b3a3a;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .modal-actions button {
+      padding: 0.55rem 1.1rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .modal-actions .save-btn {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .modal-actions .cancel-btn {
+      background: var(--card);
+      color: var(--text);
+    }
+    .add-row-btn {
+      background: var(--card);
+      border: 1px dashed var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      width: 100%;
+      margin-top: 0.3rem;
+    }
+    .editor-help {
+      background: rgba(139,94,60,0.1);
+      border-left: 3px solid var(--accent);
+      padding: 0.7rem 1rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .data-tools {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .data-tools h3 {
+      font-size: 1rem;
+      margin-bottom: 0.6rem;
+    }
+    .data-tools .row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 800px) {
+      body {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow: auto;
+      }
+      #sidebar {
+        width: 100%;
+        max-height: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 100;
+        transform: translateX(-100%);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+      }
+      #sidebar.open { transform: translateX(0); }
+      #sidebar header { padding: 1rem 1.2rem; }
+      .close-btn {
+        background: none;
+        border: none;
+        color: #f0e6d8;
+        font-size: 1.6rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 0.3rem;
+        display: block;
+      }
+      .menu-btn { display: inline-block; }
+      #main {
+        padding: 1rem 1.1rem 2rem;
+        width: 100%;
+      }
+      .card {
+        padding: 1.3rem 1.2rem;
+        border-radius: 8px;
+      }
+      h1 { font-size: 1.45rem; }
+      .summary { font-size: 1rem; }
+      .arg-item { padding: 0.85rem 1.2rem 0.85rem 1.8rem; }
+      .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 99;
+      }
+      .overlay.show { display: block; }
+    }
+  </style>
+  <!-- Firebase SDKs (compat for single-file HTML) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+  <aside id="sidebar">
+    <header>
+      <span>Biblical Arguments</span>
+      <button class="close-btn" onclick="closeMenu()" aria-label="Close menu">×</button>
+    </header>
+    <input type="text" id="search" placeholder="Search arguments…" />
+    <div id="nav"></div>
+  </aside>
+
+  <main id="main">
+    <div id="toolbar">
+      <button class="menu-btn" onclick="openMenu()">☰ Arguments</button>
+      <div class="toolbar-right">
+        <button class="edit-btn admin-only" id="addBtn" onclick="openEditor()" style="display:none">＋ Add Argument</button>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">Dark mode</button>
+        <button class="theme-btn admin-only" id="dataBtn" onclick="openDataTools()" style="display:none">Data / Backup</button>
+        <button class="theme-btn" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+      </div>
+    </div>
+    <div id="content">
+      <div class="empty">Select an argument from the sidebar</div>
+    </div>
+  </main>
+
+  <!-- Editor Modal -->
+  <div class="modal-overlay" id="editorModal">
+    <div class="modal">
+      <h2 id="editorTitle">Add Argument</h2>
+      <div class="editor-help">
+        Fill in the fields below. For <strong>Key Points</strong> and <strong>Objections</strong>, click “Add another” to create more rows. Leave objection fields blank if you don’t need them.
+      </div>
+      <form id="argForm" onsubmit="saveArgument(event)">
+        <input type="hidden" id="editId" value="" />
+        <div class="form-group">
+          <label for="fCategorySelect">Category</label>
+          <select id="fCategorySelect" required onchange="onCategoryChange()">
+            <option value="">— Select a category —</option>
+          </select>
+          <input type="text" id="fCategoryNew" placeholder="Type new category name…" style="display:none; margin-top:0.5rem" />
+          <div class="hint">Choose an existing category, or select “＋ New category…” at the bottom of the list.</div>
+        </div>
+        <div class="form-group">
+          <label for="fTitle">Title</label>
+          <input type="text" id="fTitle" required placeholder="e.g. The First Way: Argument from Motion" />
+        </div>
+        <div class="form-group">
+          <label for="fRefs">Bible / Source References</label>
+          <input type="text" id="fRefs" placeholder="e.g. Genesis 1:1; Romans 1:20; ST I, q. 2" />
+        </div>
+        <div class="form-group">
+          <label for="fSummary">Summary</label>
+          <textarea id="fSummary" required placeholder="One or two paragraphs summarizing the argument…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Key Points</label>
+          <div class="points-list" id="pointsList"></div>
+          <button type="button" class="add-row-btn" onclick="addPointRow()">＋ Add another point</button>
+        </div>
+        <div class="form-group">
+          <label>Objections & Replies (optional)</label>
+          <div class="objections-list" id="objectionsList"></div>
+          <button type="button" class="add-row-btn" onclick="addObjectionRow()">＋ Add another objection</button>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="save-btn">Save Argument</button>
+          <button type="button" class="cancel-btn" onclick="closeEditor()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Data Tools Modal -->
+  <div class="modal-overlay" id="dataModal">
+    <div class="modal">
+      <h2>Data & Backup</h2>
+      <div class="editor-help">
+        <strong>Cloud sync (Firebase):</strong> when Admin is unlocked, Add / Edit / Delete saves for <em>everyone</em> automatically.
+        Use the tools below for backups or emergency offline publish.
+      </div>
+      <div class="data-tools">
+        <h3>Backup</h3>
+        <div class="row">
+          <button class="action-btn" onclick="exportData()">⬇ Download backup (JSON)</button>
+        </div>
+        <h3 style="margin-top:1rem">Restore</h3>
+        <div class="row">
+          <button class="action-btn" onclick="document.getElementById('importFile').click()">⬆ Load backup file</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
+        </div>
+        <h3 style="margin-top:1rem">Reset</h3>
+        <div class="row">
+          <button class="action-btn danger" onclick="resetToDefaults()">Reset to published sample arguments</button>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:1.5rem">
+        <button type="button" class="cancel-btn" onclick="closeDataTools()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== DEFAULT DATA ==========
+    // @@DATA_START@@
+    const defaultData = [
+      {
+        id: "existence-god-1",
+        category: "Existence of God",
+        title: "The First Way: Argument from Motion (Aquinas)",
+        refs: "Genesis 1:1; Romans 1:19-20; Psalm 19:1; Wisdom 13:1-5; Hebrews 11:3",
+        summary: "St. Thomas Aquinas’s First Way demonstrates that there must be a First Unmoved Mover. Everything that is moved is moved by another. An infinite regress of movers is impossible. Therefore there exists a First Mover, which is God — pure Act, the source of all change and existence.",
+        points: [
+          "It is evident to the senses that some things in this world are in motion (change from potency to act). A thing cannot be both in potency and in act with respect to the same thing at the same time; therefore nothing can move itself.",
+          "Whatever is moved must be moved by another. That other, if itself moved, must likewise be moved by yet another, and so on.",
+          "This chain of movers cannot proceed to infinity. If there were no first mover, there would be no subsequent movers, for secondary movers move only insofar as they are moved by a first. The staff moves only because it is moved by the hand.",
+          "Therefore it is necessary to arrive at a First Mover that is not moved by any other. This everyone understands to be God — ipsum esse subsistens, pure actuality without any admixture of potency.",
+          "This First Mover is not merely the chronological beginning of a temporal series, but the hierarchical source of all motion and actuality at every moment. God is the continuous cause of all change in the universe.",
+          "Scripture confirms what reason discovers: “The heavens declare the glory of God” (Ps 19:1) and “ever since the creation of the world his invisible nature… has been clearly perceived in the things that have been made” (Rom 1:20)."
+        ],
+        objections: [
+          {
+            obj: "Modern physics shows that motion can begin spontaneously (quantum fluctuations, virtual particles).",
+            reply: "Quantum events do not occur without any cause; they occur within a physical framework governed by laws and fields that themselves require explanation. Even if some events appear spontaneous relative to classical causality, they still actualize potencies and thus fall under the metaphysical principle that potency is reduced to act only by something already in act. Moreover, the laws and the quantum vacuum themselves are contingent and require a necessary ground."
+          },
+          {
+            obj: "Why cannot the series of movers be infinite?",
+            reply: "An infinite series of essentially ordered (hierarchical) causes is impossible because each member depends on a prior cause for its causal power. Without a first member that possesses causal power of itself, the whole series would lack causal efficacy. This is different from an accidentally ordered temporal series (which Aquinas allows could be infinite). The First Way concerns essential, simultaneous dependence."
+          },
+          {
+            obj: "Who moved God? Or is God Himself in motion?",
+            reply: "God is pure Act (actus purus). He has no potency that needs to be actualized; therefore He is unmoved. The question “who moved God?” presupposes that God is the kind of being that requires a mover — which is precisely what the argument denies."
+          }
+        ]
+      },
+      {
+        id: "trinity-1",
+        category: "The Trinity",
+        title: "The Mystery of the Most Holy Trinity",
+        refs: "Deuteronomy 6:4; Matthew 28:19; John 1:1-14; 14:16-17,26; 15:26; 16:13-15; 2 Corinthians 13:14; 1 John 5:7 (Vulgate)",
+        summary: "The Catholic Faith professes one God in three co-equal, co-eternal Persons — Father, Son, and Holy Spirit. This is not three gods, nor one Person under three names, but one divine essence possessed fully by three distinct hypostases. The doctrine is rooted in Scripture, clarified by the Councils of Nicaea and Constantinople, and explained by the Fathers and Scholastics.",
+        points: [
+          "There is only one God. “Hear, O Israel: The Lord our God is one Lord” (Deut 6:4). Monotheism is the absolute foundation; any Trinitarian teaching that multiplies the divine essence falls into polytheism.",
+          "The Father is true God. He is the unbegotten source (principium sine principio). Scripture repeatedly calls Him “God” in the absolute sense (John 6:27; 1 Pet 1:2; Eph 1:3).",
+          "The Son is true God, consubstantial with the Father. “In the beginning was the Word, and the Word was with God, and the Word was God… and the Word became flesh” (John 1:1,14). Thomas the Apostle confesses “My Lord and my God” (John 20:28). The Council of Nicaea (325) defined that the Son is homoousios with the Father, rejecting Arian subordination.",
+          "The Holy Spirit is true God, proceeding from the Father and the Son (Filioque). He is called God (Acts 5:3-4), is the Lord and Giver of Life (Nicene-Constantinopolitan Creed), and is listed with the Father and the Son in the baptismal formula (Matt 28:19) and the apostolic blessing (2 Cor 13:14).",
+          "The three Persons are really distinct. The Father is not the Son; the Son is not the Spirit; the Spirit is not the Father. They are distinguished by their relations of origin: the Father generates the Son; the Father and the Son spirate the Holy Spirit. These relations are not accidental but constitute the Persons themselves.",
+          "Yet the divine essence is one and undivided. Each Person possesses the whole divine nature. There is no division of substance, power, or glory. As the Athanasian Creed states: “The Father is God, the Son is God, and the Holy Spirit is God; and yet they are not three Gods, but one God.”",
+          "This mystery is not contrary to reason, but above reason. Reason can demonstrate that God is one and that He is infinitely perfect; faith reveals that this one God is a Trinity of Persons. The analogies of mind, word, and love (Augustine) or of the sun, ray, and heat help the intellect, but never exhaust the mystery."
+        ],
+        objections: [
+          {
+            obj: "The word ‘Trinity’ never appears in Scripture; therefore the doctrine is a later invention.",
+            reply: "The word is not required if the reality is taught. Scripture clearly presents the Father, Son, and Spirit as divine and distinct while insisting on monotheism. The Church, under the guidance of the Spirit, formulated the language (Trinity, Person, consubstantial) to protect the biblical data against heresies. The same is true of terms such as ‘Incarnation’ or ‘Original Sin.’"
+          },
+          {
+            obj: "If the Son is begotten and the Spirit proceeds, they must be inferior to the Father.",
+            reply: "Procession in God is not temporal or causal in the creaturely sense. The Son is eternally begotten of the substance of the Father; the Spirit eternally proceeds. There is no ‘before’ or ‘after,’ no greater or lesser. All three Persons are co-equal and co-eternal. Subordinationism was condemned at Nicaea."
+          },
+          {
+            obj: "How can three distinct Persons be one God without contradiction?",
+            reply: "There is no contradiction because ‘Person’ and ‘essence’ answer different questions. The essence answers ‘what’ God is; the Persons answer ‘who’ God is. One what, three whos. The distinction is real but does not multiply the substance. This is a mystery of faith, not a logical absurdity."
+          }
+        ]
+      },
+      {
+        id: "salvation-1",
+        category: "Salvation",
+        title: "Justification: Faith, Grace, and Works (Catholic Doctrine)",
+        refs: "Romans 3:21-28; 5:1-11; Galatians 2:16; Ephesians 2:8-10; James 2:14-26; Matthew 25:31-46; Philippians 2:12-13; Council of Trent, Session VI",
+        summary: "Catholic teaching holds that justification is the gracious transformation of the sinner into a child of God by the infusion of sanctifying grace. It begins with faith, is increased by good works done in grace, and can be lost by mortal sin. It is neither mere forensic declaration nor salvation by human effort, but a real participation in the divine life (2 Pet 1:4).",
+        points: [
+          "All men are born in original sin and stand in need of justification. “All have sinned and fall short of the glory of God” (Rom 3:23). No one can justify himself by the works of the Law or by purely natural effort.",
+          "Justification is a free gift of God, merited solely by the Passion of Christ. “They are justified by his grace as a gift, through the redemption which is in Christ Jesus” (Rom 3:24). Man contributes nothing to the first grace of justification; it is entirely prevenient.",
+          "Faith is the beginning, foundation, and root of all justification (Trent, Sess. VI, ch. 8). Without faith it is impossible to please God (Heb 11:6). Yet faith alone (sola fide as understood by the Reformers) is not sufficient. “Faith without works is dead” (Jas 2:26).",
+          "In justification the sinner is not merely declared righteous but is truly made righteous. Sanctifying grace is poured into the soul, the Holy Spirit is given, and the person becomes a partaker of the divine nature. This is the Catholic understanding of “being born again” and “new creation.”",
+          "Good works performed in the state of grace are meritorious and increase justification. “Work out your own salvation with fear and trembling; for God is at work in you” (Phil 2:12-13). The Council of Trent teaches that the justified can truly merit increase of grace and eternal life, always under the primacy of grace.",
+          "Justification can be lost through mortal sin and restored through the sacrament of Penance. Perseverance to the end is itself a gift of God for which we must pray. Final salvation is not an absolute guarantee based on a once-for-all decision, but a lifelong cooperation with grace.",
+          "At the Last Judgment, works will be examined (Matt 25:31-46). They are not the foundation of salvation (which is Christ’s merits), but the evidence and fruit of living faith, and the means by which God rewards His children."
+        ],
+        objections: [
+          {
+            obj: "St. Paul says we are justified by faith apart from works of the Law (Rom 3:28). Catholics add works and thereby deny the sufficiency of Christ’s sacrifice.",
+            reply: "Paul is speaking of the works of the Mosaic Law as a system of justification, and of initial justification. He never denies that the justified person must live in charity and perform good works. James explicitly corrects a misunderstanding of Paul. The Catholic position holds both: initial justification is by grace through faith, and ongoing justification/sanctification involves works done in grace. Christ’s sacrifice is the sole meritorious cause; our works are the fruit and the condition of remaining in that grace."
+          },
+          {
+            obj: "If we can merit, then salvation is no longer pure gift.",
+            reply: "Merit in Catholic theology is itself a gift. God freely orders that those who live in His grace will be rewarded. As Augustine said, ‘When God crowns our merits, He crowns His own gifts.’ There is no competition between grace and merit properly understood."
+          },
+          {
+            obj: "Assurance of salvation is lost if justification can be forfeited.",
+            reply: "Scripture itself warns against presumption (1 Cor 10:12; Heb 6:4-6; 10:26-29). The Catholic has a firm hope based on God’s promises and the ordinary means of grace, while rejecting both despair and the absolute assurance that can lead to spiritual pride. Hope is a theological virtue; presumption is a sin against it."
+          }
+        ]
+      },
+      {
+        id: "ethics-1",
+        category: "Ethics & Morality",
+        title: "Natural Law and the Moral Argument",
+        refs: "Romans 2:14-15; Psalm 19:7-11; Wisdom 13:1-9; Matthew 5:17-20; 7:12; 22:37-40; CCC 1954-1960",
+        summary: "Human beings possess a natural moral law written on the heart, which participates in the eternal law of God. This natural law is knowable by reason and is the foundation of all just human law. Its existence and content point beyond themselves to a divine Lawgiver who is both the source of moral obligation and the ultimate end of human flourishing.",
+        points: [
+          "There exists a natural moral law. Even those without the Mosaic Law “do by nature what the law requires… They show that what the law requires is written on their hearts” (Rom 2:14-15). This law is not invented by society but discovered by practical reason reflecting on human nature and its ends.",
+          "The first principle of natural law is: “Good is to be done and pursued, and evil is to be avoided.” From this flow secondary precepts: preserve life, seek truth, live in society, worship God, etc. These are not arbitrary but rooted in the teleology of the human person as a rational, social, and religious being.",
+          "If objective moral obligation exists, it requires a transcendent ground. Mere evolutionary advantage or social contract cannot generate categorical ‘oughts.’ As C.S. Lewis and others have noted, the sense of moral duty is inexplicable on purely materialist premises. The natural law is a participation in the eternal law of God (Aquinas, ST I-II, q. 91).",
+          "The natural law is universal and immutable in its primary precepts, yet its application can require prudence and can be obscured by culture, passion, or original sin. This explains both the broad agreement among civilizations on basic moral norms and the variations in particular judgments.",
+          "Christ did not abolish the natural or the moral law but fulfilled it (Matt 5:17). The New Law of the Gospel elevates and perfects the natural law by the infusion of charity and the gifts of the Holy Spirit. The Beatitudes and the Sermon on the Mount reveal the true end of human action: beatitude in God.",
+          "Civil law that contradicts the natural law is not true law but a corruption of law (Augustine, Aquinas). This principle undergirds the Church’s teaching on intrinsic evils (e.g., abortion, euthanasia, contraception) that no human authority can make legitimate.",
+          "The moral argument for God’s existence may be stated: (1) If God does not exist, objective moral values and duties do not exist. (2) Objective moral values and duties do exist. (3) Therefore God exists. The natural-law tradition supplies the positive content of premise (2) and explains how finite reason can know it."
+        ],
+        objections: [
+          {
+            obj: "Morality is a product of evolution and social conditioning; there is no objective natural law.",
+            reply: "Evolution may explain why we have moral feelings, but it cannot explain why we ought to obey them when they conflict with self-interest or reproductive advantage. Social conditioning varies; the core precepts of natural law (do not murder the innocent, do not lie under oath, honor parents, etc.) appear across cultures. The persistence of moral realism in ordinary experience and in the criminal law of every society is better explained by a real natural law than by pure constructivism."
+          },
+          {
+            obj: "Different cultures have radically different moral codes; therefore natural law is a myth.",
+            reply: "Differences are often exaggerated or concern secondary applications rather than primary precepts. Every culture condemns the wanton killing of one’s own children or the betrayal of one’s community. Apparent contradictions frequently turn out to involve different factual beliefs (e.g., about what counts as a human being) rather than different ultimate moral principles. The existence of moral reformers who appeal beyond their culture further suggests an objective standard."
+          },
+          {
+            obj: "Natural law theory is used to impose Catholic sexual ethics on non-believers.",
+            reply: "The natural-law arguments concerning marriage, sexuality, and life are philosophical before they are theological. They appeal to the observable teleology of the human body and the requirements of the common good. One may reject the conclusions, but the proper response is to engage the arguments on the level of reason, not to dismiss them as purely religious."
+          }
+        ]
+      },
+      {
+        id: "eucharist-1",
+        category: "The Sacraments",
+        title: "The Real Presence: Transubstantiation",
+        refs: "John 6:51-58; Matthew 26:26-28; Mark 14:22-24; Luke 22:19-20; 1 Corinthians 10:16-17; 11:23-29; Council of Trent, Session XIII",
+        summary: "In the sacrament of the Eucharist, the substance of bread and wine is converted into the Body and Blood of Christ, while the accidents (appearances) remain. This is not a mere symbol or spiritual presence, but the true, real, and substantial presence of Christ — body, blood, soul, and divinity — under the sacramental species.",
+        points: [
+          "Christ’s words at the Last Supper are clear and emphatic: “This is my body… This is my blood” (Matt 26:26-28). He does not say “this represents” or “this symbolizes.” The same realism appears in the Bread of Life discourse: “My flesh is true food, and my blood is true drink” (John 6:55). Many disciples left Him because they understood Him literally (John 6:66).",
+          "St. Paul warns that whoever eats and drinks unworthily is “guilty of profaning the body and blood of the Lord” and eats and drinks judgment upon himself (1 Cor 11:27-29). Such language is unintelligible if the Eucharist is only a symbol.",
+          "The Church from the earliest centuries understood the Eucharist as the true Body of Christ. St. Ignatius of Antioch (c. 110) calls it “the flesh of our Savior Jesus Christ.” St. Justin Martyr, St. Irenaeus, St. Cyril of Jerusalem, and countless others speak in realist terms.",
+          "Transubstantiation is the term defined by the Council of Trent to express the conversion of the whole substance of bread into the substance of the Body of Christ, and of the whole substance of wine into the substance of His Blood. The accidents remain without a subject; the substance of Christ is present without His accidents being locally extended in the manner of ordinary bodies.",
+          "This presence is sacramental, not physical in the crude sense. Christ is not present as in a place by spatial extension; He is present whole and entire under every part of the species. The mode is unique and supernatural, yet truly substantial.",
+          "The Eucharist is both sacrifice and sacrament. It re-presents (makes present) the one sacrifice of Calvary in an unbloody manner, applying its fruits to the Church. It is also the food of eternal life, uniting the communicant to Christ and to the whole Body of Christ.",
+          "Adoration of the Eucharist is therefore fitting. Since Christ is truly present, the worship of latria (adoration due to God alone) is given to the Blessed Sacrament. This practice is continuous with the Church’s faith and is not idolatry, because what is adored is not bread but the living God."
+        ],
+        objections: [
+          {
+            obj: "This is cannibalism / a crude, physicalist understanding of the sacrament.",
+            reply: "The charge of cannibalism misunderstands the mode of presence. We do not tear or digest the physical body of Christ as it was in Palestine. The substance is present sacramentally; the accidents of bread and wine remain and are what is consumed. The Fathers already answered this objection by distinguishing the spiritual and sacramental mode from ordinary physical eating."
+          },
+          {
+            obj: "John 6 is metaphorical; Jesus often spoke in figures (‘I am the door,’ ‘I am the vine’).",
+            reply: "In those other cases Jesus explains the metaphor or the context makes it obvious. In John 6 He intensifies the realism when the crowd objects, and He allows disciples to leave rather than soften the teaching. Moreover, the parallel institution narratives at the Last Supper use the same language in a context of sacrificial covenant, not of metaphor."
+          },
+          {
+            obj: "Transubstantiation relies on outdated Aristotelian categories of substance and accident.",
+            reply: "The Church uses philosophical language to express revealed truth; she is not wedded to every detail of Aristotle. The distinction between what a thing is (substance) and its sensible appearances is common-sense and perennial. Modern physics has not abolished the difference between a thing and its properties. The dogma concerns the real conversion of what the bread is into what the Body of Christ is; the philosophical terms are at the service of that affirmation."
+          }
+        ]
+      },
+      {
+        id: "papacy-1",
+        category: "The Church",
+        title: "The Primacy of Peter and the Papacy",
+        refs: "Matthew 16:18-19; 18:18; Luke 22:31-32; John 21:15-17; Acts 1:15-26; 15:7-12; Galatians 1:18; 2:9; Vatican I, Pastor Aeternus",
+        summary: "Christ conferred upon Peter a unique primacy of jurisdiction over the whole Church. This primacy continues in Peter’s successors, the Bishops of Rome. The Pope is the perpetual and visible principle of unity and the supreme pastor of the universal Church, possessing full, supreme, and universal power of jurisdiction.",
+        points: [
+          "In Matthew 16:18-19 Christ changes Simon’s name to Peter (Rock) and declares: “Upon this rock I will build my Church… I will give you the keys of the kingdom of heaven.” The singular “you” (soi) and the imagery of the keys (cf. Isa 22:22) indicate a unique office of stewardship and authority.",
+          "Christ prays specifically for Peter that his faith may not fail, and commissions him to “strengthen your brethren” (Luke 22:31-32). After the Resurrection He singles Peter out with the threefold “Feed my lambs… Tend my sheep… Feed my sheep” (John 21:15-17), restoring him and confirming his pastoral charge over the whole flock.",
+          "In the Acts of the Apostles Peter exercises a clear leadership role: he initiates the replacement of Judas, preaches the first sermon at Pentecost, works the first miracle, opens the Church to the Gentiles, and speaks decisively at the Council of Jerusalem.",
+          "The early Church recognized the unique authority of the Roman See. St. Clement of Rome intervenes in Corinth (c. 96). St. Ignatius of Antioch speaks of the Church that “presides in love.” St. Irenaeus points to the apostolic succession of Rome as the sure norm of faith. By the fourth and fifth centuries the Bishop of Rome is regularly appealed to as the final court of appeal.",
+          "The First Vatican Council defined that the Roman Pontiff possesses a primacy of true and proper jurisdiction, not merely of honor, and that this primacy is immediate and ordinary over all the faithful and all the pastors. When he speaks ex cathedra on matters of faith or morals, he is protected from error by the charism of infallibility.",
+          "This primacy is not absolute monarchy in the worldly sense. The Pope is bound by revelation, by the tradition of the Church, and by the very constitution of the Church. He is the servant of the servants of God, whose authority exists for the sake of unity and the salvation of souls.",
+          "The unbroken line of succession from Peter to the present Bishop of Rome is a historical fact of unique significance. No other see can claim the same continuous and universal recognition of primacy."
+        ],
+        objections: [
+          {
+            obj: "Peter was only first among equals; the ‘rock’ is Peter’s confession, not Peter himself.",
+            reply: "While Peter’s confession is the content of the faith on which the Church is built, the grammar and the renaming of Simon make Peter himself the rock. The keys are given to him personally. The early Fathers, both East and West, understood the text as establishing a personal primacy that continues in his successors."
+          },
+          {
+            obj: "Peter never claimed supremacy and was rebuked by Paul (Gal 2).",
+            reply: "Paul’s rebuke concerns Peter’s practical inconsistency, not his office. One can correct a superior’s behavior without denying his authority (as Aquinas and others note). Peter’s silence in the face of the rebuke is itself a mark of humility, not a denial of primacy. Elsewhere Paul seeks Peter out as a pillar (Gal 1:18; 2:9)."
+          },
+          {
+            obj: "The modern papacy is a medieval development foreign to the early Church.",
+            reply: "Development of doctrine and of institutional forms is real, but the seed of primacy is present from the beginning. The same Church that defined the Trinity and the hypostatic union also recognized the unique role of the Roman See. Historical growth in the exercise of primacy does not invalidate the original gift of Christ any more than the development of the Creed invalidates the apostolic preaching."
+          }
+        ]
+      }
+    ];
+    // @@DATA_END@@
+
+    // ========== STATE ==========
+    let argData = [];
+    const STORAGE_KEY = "biblical_arguments_v1";
+    const DB_PATH = "arguments";
+
+    // ========== FIREBASE ==========
+    const firebaseConfig = {
+      apiKey: "AIzaSyDq12i44_U9xr2C9L7liFjqPkZhC36jFGg",
+      authDomain: "biblical-arguments.firebaseapp.com",
+      projectId: "biblical-arguments",
+      storageBucket: "biblical-arguments.firebasestorage.app",
+      messagingSenderId: "630467836190",
+      appId: "1:630467836190:web:78d0f9ac46a664f696710f",
+      measurementId: "G-0X3TYGYFS0",
+      databaseURL: "https://biblical-arguments-default-rtdb.firebaseio.com"
+    };
+
+    let db = null;
+    let auth = null;
+    let firebaseReady = false;
+    let suppressRemote = false;
+
+    function initFirebase() {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
+        auth = firebase.auth();
+        firebaseReady = true;
+        return true;
+      } catch (e) {
+        console.warn("Firebase init failed:", e);
+        firebaseReady = false;
+        return false;
+      }
+    }
+
+    // Admin = signed in with Firebase Email/Password (not a shared page password)
+    function isAdmin() {
+      return !!(auth && auth.currentUser);
+    }
+
+    function updateAdminUI() {
+      const show = isAdmin();
+      document.querySelectorAll(".admin-only").forEach(el => {
+        el.style.display = show ? "" : "none";
+      });
+      document.body.classList.toggle("admin-mode", show);
+      const btn = document.getElementById("adminBtn");
+      if (btn) {
+        btn.textContent = show
+          ? ("Sign out (" + (auth.currentUser.email || "admin") + ")")
+          : "Admin login";
+      }
+      // Refresh card actions if an argument is open
+      const active = document.querySelector(".arg-item.active");
+      if (active) selectArg(active.dataset.id);
+    }
+
+    async function toggleAdmin() {
+      if (!initFirebase() || !auth) {
+        alert("Firebase is not available. Check your connection and config.");
+        return;
+      }
+      if (isAdmin()) {
+        try {
+          await auth.signOut();
+        } catch (e) {
+          console.warn(e);
+        }
+        updateAdminUI();
+        content.innerHTML = `<div class="empty">Select an argument from the sidebar</div>`;
+        return;
+      }
+      const email = prompt("Admin email:");
+      if (email === null || !email.trim()) return;
+      const password = prompt("Admin password:");
+      if (password === null) return;
+      try {
+        await auth.signInWithEmailAndPassword(email.trim(), password);
+        updateAdminUI();
+        alert("Signed in. You can add, edit, and delete arguments.\n\nChanges save to the cloud for everyone.");
+      } catch (err) {
+        let msg = "Sign-in failed.";
+        if (err && err.code === "auth/user-not-found") msg = "No account with that email. Create the user in Firebase Console → Authentication.";
+        else if (err && err.code === "auth/wrong-password") msg = "Incorrect password.";
+        else if (err && err.code === "auth/invalid-email") msg = "Invalid email address.";
+        else if (err && err.code === "auth/invalid-credential") msg = "Invalid email or password.";
+        else if (err && err.message) msg = err.message;
+        alert(msg);
+      }
+    }
+
+    function applyData(list, rebuild) {
+      argData = Array.isArray(list) ? list : [];
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(argData));
+      } catch (e) {}
+      if (rebuild) {
+        const active = document.querySelector(".arg-item.active");
+        const activeId = active ? active.dataset.id : null;
+        buildNav(searchInput ? searchInput.value : "");
+        if (activeId && argData.some(a => a.id === activeId)) {
+          selectArg(activeId);
+        } else if (!argData.length) {
+          content.innerHTML = `<div class="empty">No arguments yet.<br><small>Admin can add the first one.</small></div>`;
+        }
+      }
+    }
+
+    function loadData() {
+      // Instant fallback so the page isn't empty while Firebase loads
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          argData = JSON.parse(saved);
+          return;
+        }
+      } catch (e) {}
+      argData = JSON.parse(JSON.stringify(defaultData));
+    }
+
+    function startFirebaseSync() {
+      if (!initFirebase() || !db) {
+        console.warn("Using local data only — Firebase not available. Check databaseURL and that Realtime Database is created.");
+        return;
+      }
+      const ref = db.ref(DB_PATH);
+      ref.on("value", snap => {
+        if (suppressRemote) return;
+        const val = snap.val();
+        if (val === null || val === undefined) {
+          // First run: seed the database with default sample arguments
+          suppressRemote = true;
+          ref.set(defaultData).finally(() => { suppressRemote = false; });
+          applyData(defaultData, true);
+          return;
+        }
+        const list = Array.isArray(val) ? val : Object.values(val);
+        applyData(list, true);
+      }, err => {
+        console.warn("Firebase read error:", err);
+      });
+    }
+
+    function saveData() {
+      // Always keep a local cache
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(argData));
+      } catch (e) {}
+      // Push to Firebase so everyone sees the update
+      if (firebaseReady && db) {
+        suppressRemote = true;
+        db.ref(DB_PATH).set(argData)
+          .catch(err => {
+            console.warn("Firebase write failed:", err);
+            alert("Could not save to the cloud. Check Realtime Database rules and that the database exists.\n\n" + (err && err.message ? err.message : ""));
+          })
+          .finally(() => {
+            setTimeout(() => { suppressRemote = false; }, 500);
+          });
+      }
+    }
+
+    // ========== UI ==========
+    const nav = document.getElementById("nav");
+    const content = document.getElementById("content");
+    const searchInput = document.getElementById("search");
+
+    function buildNav(filter = "") {
+      nav.innerHTML = "";
+      const cats = {};
+      argData.forEach(a => {
+        if (filter && !`${a.title} ${a.category} ${a.summary} ${a.refs}`.toLowerCase().includes(filter.toLowerCase())) return;
+        if (!cats[a.category]) cats[a.category] = [];
+        cats[a.category].push(a);
+      });
+
+      Object.keys(cats).sort().forEach(cat => {
+        const div = document.createElement("div");
+        div.className = "category";
+        div.innerHTML = `<div class="category-title">${cat}</div>`;
+        const list = document.createElement("div");
+        list.className = "args";
+        cats[cat].forEach(a => {
+          const item = document.createElement("div");
+          item.className = "arg-item";
+          item.dataset.id = a.id;
+          item.innerHTML = `<span class="arg-title">${escapeHtml(a.title)}</span><button type="button" class="sidebar-edit" title="Edit" aria-label="Edit">✎</button>`;
+          item.querySelector(".arg-title").onclick = () => selectArg(a.id);
+          item.querySelector(".sidebar-edit").onclick = (e) => {
+            e.stopPropagation();
+            if (!isAdmin()) return;
+            selectArg(a.id);
+            editArgument(a.id);
+          };
+          // also allow clicking the row (not just the title)
+          item.addEventListener("click", (e) => {
+            if (e.target.closest(".sidebar-edit")) return;
+            selectArg(a.id);
+          });
+          list.appendChild(item);
+        });
+        div.appendChild(list);
+        div.querySelector(".category-title").onclick = () => div.classList.toggle("open");
+        nav.appendChild(div);
+      });
+      updateCategoryList();
+    }
+
+    function selectArg(id) {
+      document.querySelectorAll(".arg-item").forEach(el => el.classList.remove("active"));
+      const active = document.querySelector(`.arg-item[data-id="${id}"]`);
+      if (active) active.classList.add("active");
+
+      const a = argData.find(x => x.id === id);
+      if (!a) return;
+
+      let html = `<div class="card">`;
+      if (isAdmin()) {
+        html += `
+          <div class="card-header-actions">
+            <button class="edit-btn" onclick="editArgument('${a.id}')">✎ Edit this argument</button>
+            <button class="action-btn danger" onclick="deleteArgument('${a.id}')">Delete</button>
+          </div>`;
+      }
+      html += `
+          <h1>${escapeHtml(a.title)}</h1>
+          <div class="refs">${linkifyBibleRefs(a.refs || "")}</div>
+          <div class="summary">${linkifyBibleRefs(a.summary)}</div>
+          <h2>Key Points</h2>
+          <ol>${(a.points || []).map(p => `<li>${linkifyBibleRefs(p)}</li>`).join("")}</ol>
+      `;
+      if (a.objections && a.objections.length) {
+        html += `<h2>Objections & Replies</h2>`;
+        a.objections.forEach(o => {
+          html += `
+            <div class="objection">
+              <strong>Objection:</strong> ${linkifyBibleRefs(o.obj)}
+              <div class="reply"><strong>Reply:</strong> ${linkifyBibleRefs(o.reply)}</div>
+            </div>`;
+        });
+      }
+      html += `</div>`;
+      content.innerHTML = html;
+
+      if (window.innerWidth <= 800) closeMenu();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // Map common book names / abbreviations → Bible Hub slug
+    const BIBLE_BOOKS = {
+      "genesis": "genesis", "gen": "genesis", "gn": "genesis",
+      "exodus": "exodus", "exod": "exodus", "ex": "exodus",
+      "leviticus": "leviticus", "lev": "leviticus", "lv": "leviticus",
+      "numbers": "numbers", "num": "numbers", "nm": "numbers",
+      "deuteronomy": "deuteronomy", "deut": "deuteronomy", "dt": "deuteronomy",
+      "joshua": "joshua", "josh": "joshua", "jos": "joshua",
+      "judges": "judges", "judg": "judges", "jgs": "judges",
+      "ruth": "ruth", "ru": "ruth",
+      "1 samuel": "1_samuel", "1 sam": "1_samuel", "1 sam.": "1_samuel", "1sm": "1_samuel", "i samuel": "1_samuel",
+      "2 samuel": "2_samuel", "2 sam": "2_samuel", "2 sam.": "2_samuel", "2sm": "2_samuel", "ii samuel": "2_samuel",
+      "1 kings": "1_kings", "1 kgs": "1_kings", "1 ki": "1_kings", "i kings": "1_kings",
+      "2 kings": "2_kings", "2 kgs": "2_kings", "2 ki": "2_kings", "ii kings": "2_kings",
+      "1 chronicles": "1_chronicles", "1 chron": "1_chronicles", "1 chr": "1_chronicles", "i chronicles": "1_chronicles",
+      "2 chronicles": "2_chronicles", "2 chron": "2_chronicles", "2 chr": "2_chronicles", "ii chronicles": "2_chronicles",
+      "ezra": "ezra", "ezr": "ezra",
+      "nehemiah": "nehemiah", "neh": "nehemiah",
+      "tobit": "tobit", "tob": "tobit",
+      "judith": "judith", "jdt": "judith",
+      "esther": "esther", "est": "esther",
+      "1 maccabees": "1_maccabees", "1 macc": "1_maccabees", "1 mc": "1_maccabees",
+      "2 maccabees": "2_maccabees", "2 macc": "2_maccabees", "2 mc": "2_maccabees",
+      "job": "job",
+      "psalm": "psalms", "psalms": "psalms", "ps": "psalms", "psa": "psalms",
+      "proverbs": "proverbs", "prov": "proverbs", "prv": "proverbs",
+      "ecclesiastes": "ecclesiastes", "eccl": "ecclesiastes", "eccles": "ecclesiastes",
+      "song of solomon": "songs", "song of songs": "songs", "canticle": "songs", "cant": "songs", "sg": "songs",
+      "wisdom": "wisdom", "wis": "wisdom", "wisdom of solomon": "wisdom",
+      "sirach": "sirach", "ecclesiasticus": "sirach", "sir": "sirach",
+      "isaiah": "isaiah", "isa": "isaiah", "is": "isaiah",
+      "jeremiah": "jeremiah", "jer": "jeremiah",
+      "lamentations": "lamentations", "lam": "lamentations",
+      "baruch": "baruch", "bar": "baruch",
+      "ezekiel": "ezekiel", "ezek": "ezekiel", "ez": "ezekiel",
+      "daniel": "daniel", "dan": "daniel", "dn": "daniel",
+      "hosea": "hosea", "hos": "hosea",
+      "joel": "joel", "jl": "joel",
+      "amos": "amos", "am": "amos",
+      "obadiah": "obadiah", "obad": "obadiah", "ob": "obadiah",
+      "jonah": "jonah", "jon": "jonah",
+      "micah": "micah", "mic": "micah",
+      "nahum": "nahum", "nah": "nahum",
+      "habakkuk": "habakkuk", "hab": "habakkuk",
+      "zephaniah": "zephaniah", "zeph": "zephaniah",
+      "haggai": "haggai", "hag": "haggai",
+      "zechariah": "zechariah", "zech": "zechariah", "zec": "zechariah",
+      "malachi": "malachi", "mal": "malachi",
+      "matthew": "matthew", "matt": "matthew", "mt": "matthew",
+      "mark": "mark", "mk": "mark",
+      "luke": "luke", "lk": "luke",
+      "john": "john", "jn": "john", "joh": "john",
+      "acts": "acts", "act": "acts",
+      "romans": "romans", "rom": "romans", "rm": "romans",
+      "1 corinthians": "1_corinthians", "1 cor": "1_corinthians", "1 cor.": "1_corinthians", "1co": "1_corinthians", "i corinthians": "1_corinthians",
+      "2 corinthians": "2_corinthians", "2 cor": "2_corinthians", "2 cor.": "2_corinthians", "2co": "2_corinthians", "ii corinthians": "2_corinthians",
+      "galatians": "galatians", "gal": "galatians",
+      "ephesians": "ephesians", "eph": "ephesians",
+      "philippians": "philippians", "phil": "philippians", "php": "philippians",
+      "colossians": "colossians", "col": "colossians",
+      "1 thessalonians": "1_thessalonians", "1 thess": "1_thessalonians", "1 thes": "1_thessalonians", "1th": "1_thessalonians",
+      "2 thessalonians": "2_thessalonians", "2 thess": "2_thessalonians", "2 thes": "2_thessalonians", "2th": "2_thessalonians",
+      "1 timothy": "1_timothy", "1 tim": "1_timothy", "1 tm": "1_timothy",
+      "2 timothy": "2_timothy", "2 tim": "2_timothy", "2 tm": "2_timothy",
+      "titus": "titus", "tit": "titus",
+      "philemon": "philemon", "phlm": "philemon", "phm": "philemon",
+      "hebrews": "hebrews", "heb": "hebrews",
+      "james": "james", "jas": "james", "jm": "james",
+      "1 peter": "1_peter", "1 pet": "1_peter", "1 pt": "1_peter", "i peter": "1_peter",
+      "2 peter": "2_peter", "2 pet": "2_peter", "2 pt": "2_peter", "ii peter": "2_peter",
+      "1 john": "1_john", "1 jn": "1_john", "1 joh": "1_john", "i john": "1_john",
+      "2 john": "2_john", "2 jn": "2_john", "ii john": "2_john",
+      "3 john": "3_john", "3 jn": "3_john", "iii john": "3_john",
+      "jude": "jude",
+      "revelation": "revelation", "rev": "revelation", "rv": "revelation", "apocalypse": "revelation"
+    };
+
+    function bookSlug(name) {
+      const key = name.toLowerCase().replace(/\./g, "").trim();
+      return BIBLE_BOOKS[key] || null;
+    }
+
+    // Display names for Bible Gateway
+    const BIBLE_DISPLAY = {
+      "genesis": "Genesis", "exodus": "Exodus", "leviticus": "Leviticus", "numbers": "Numbers",
+      "deuteronomy": "Deuteronomy", "joshua": "Joshua", "judges": "Judges", "ruth": "Ruth",
+      "1_samuel": "1 Samuel", "2_samuel": "2 Samuel", "1_kings": "1 Kings", "2_kings": "2 Kings",
+      "1_chronicles": "1 Chronicles", "2_chronicles": "2 Chronicles", "ezra": "Ezra", "nehemiah": "Nehemiah",
+      "tobit": "Tobit", "judith": "Judith", "esther": "Esther",
+      "1_maccabees": "1 Maccabees", "2_maccabees": "2 Maccabees",
+      "job": "Job", "psalms": "Psalm", "proverbs": "Proverbs", "ecclesiastes": "Ecclesiastes",
+      "songs": "Song of Solomon", "wisdom": "Wisdom", "sirach": "Sirach",
+      "isaiah": "Isaiah", "jeremiah": "Jeremiah", "lamentations": "Lamentations", "baruch": "Baruch",
+      "ezekiel": "Ezekiel", "daniel": "Daniel", "hosea": "Hosea", "joel": "Joel", "amos": "Amos",
+      "obadiah": "Obadiah", "jonah": "Jonah", "micah": "Micah", "nahum": "Nahum", "habakkuk": "Habakkuk",
+      "zephaniah": "Zephaniah", "haggai": "Haggai", "zechariah": "Zechariah", "malachi": "Malachi",
+      "matthew": "Matthew", "mark": "Mark", "luke": "Luke", "john": "John", "acts": "Acts",
+      "romans": "Romans", "1_corinthians": "1 Corinthians", "2_corinthians": "2 Corinthians",
+      "galatians": "Galatians", "ephesians": "Ephesians", "philippians": "Philippians", "colossians": "Colossians",
+      "1_thessalonians": "1 Thessalonians", "2_thessalonians": "2 Thessalonians",
+      "1_timothy": "1 Timothy", "2_timothy": "2 Timothy", "titus": "Titus", "philemon": "Philemon",
+      "hebrews": "Hebrews", "james": "James", "1_peter": "1 Peter", "2_peter": "2 Peter",
+      "1_john": "1 John", "2_john": "2 John", "3_john": "3 John", "jude": "Jude", "revelation": "Revelation"
+    };
+
+    // Link CCC, Aquinas Summa, and Bible references
+    function linkifyBibleRefs(text) {
+      if (!text) return "";
+      // Work on plain text first; insert links from end → start so offsets stay valid
+      const plain = String(text);
+      const links = []; // {start, end, html}
+
+      // CCC: "CCC 1954", "CCC 1954-1960"
+      {
+        const re = /\b(?:CCC|Catechism(?:\s+of\s+the\s+Catholic\s+Church)?)\s+(\d+)(?:\s*[-–—]\s*(\d+))?/gi;
+        let m;
+        while ((m = re.exec(plain)) !== null) {
+          const url = `https://www.scborromeo.org/ccc/para/${m[1]}.htm`;
+          links.push({
+            start: m.index,
+            end: m.index + m[0].length,
+            html: `<a class="bible-ref" href="${url}" target="_blank" rel="noopener noreferrer" title="CCC ${m[1]} on scborromeo.org">${escapeHtml(m[0])}</a>`
+          });
+        }
+      }
+
+      // Aquinas: require question number so bare "ST" or "ST I" are NOT linked
+      {
+        const re = /\b(ST|STh|Summa(?:\s+Theologiae)?)\s*(I-II|II-II|III|II|I)\s*,?\s*q\.?\s*(\d+)(?:\s*,?\s*a\.?\s*(\d+))?/gi;
+        let m;
+        while ((m = re.exec(plain)) !== null) {
+          if (links.some(l => m.index < l.end && m.index + m[0].length > l.start)) continue;
+          let partNorm = m[2].toUpperCase();
+          if (!/^(I-II|II-II|III|II|I)$/.test(partNorm)) partNorm = "I";
+          let path = `ST.${partNorm}.Q${m[3]}`;
+          if (m[4]) path += `.A${m[4]}`;
+          const url = `https://aquinas.cc/la/en/~${path}`;
+          links.push({
+            start: m.index,
+            end: m.index + m[0].length,
+            html: `<a class="bible-ref" href="${url}" target="_blank" rel="noopener noreferrer" title="Open on aquinas.cc">${escapeHtml(m[0])}</a>`
+          });
+        }
+      }
+
+      // Church Councils
+      {
+        const councils = [
+          { re: /\b(?:Council\s+of\s+)?Trent\b/gi,
+            url: "https://www.papalencyclicals.net/councils/trent.htm", title: "Council of Trent" },
+          { re: /\b(?:First\s+)?Vatican\s+Council\b|\bVatican\s+I\b/gi,
+            url: "https://www.papalencyclicals.net/councils/ecum20.htm", title: "First Vatican Council" },
+          { re: /\b(?:Second\s+)?Vatican\s+Council\b|\bVatican\s+II\b/gi,
+            url: "https://www.vatican.va/archive/hist_councils/ii_vatican_council/index.htm", title: "Second Vatican Council" },
+          { re: /\b(?:First\s+)?Council\s+of\s+Nicaea\b|\bNicaea\s+I\b/gi,
+            url: "https://www.papalencyclicals.net/councils/ecum01.htm", title: "First Council of Nicaea" },
+          { re: /\bCouncil\s+of\s+Chalcedon\b/gi,
+            url: "https://www.papalencyclicals.net/councils/ecum04.htm", title: "Council of Chalcedon" },
+          { re: /\bCouncil\s+of\s+Ephesus\b/gi,
+            url: "https://www.papalencyclicals.net/councils/ecum03.htm", title: "Council of Ephesus" },
+          { re: /\b(?:First\s+)?Council\s+of\s+Constantinople\b/gi,
+            url: "https://www.papalencyclicals.net/councils/ecum02.htm", title: "First Council of Constantinople" },
+          { re: /\b(?:Fourth\s+Lateran\s+Council|Lateran\s+(?:IV|4))\b/gi,
+            url: "https://www.papalencyclicals.net/councils/ecum12.htm", title: "Fourth Lateran Council" },
+          { re: /\bCouncil\s+of\s+Florence\b/gi,
+            url: "https://www.papalencyclicals.net/councils/ecum17.htm", title: "Council of Florence" }
+        ];
+        for (const c of councils) {
+          let m;
+          const re = new RegExp(c.re.source, "gi");
+          while ((m = re.exec(plain)) !== null) {
+            if (links.some(l => m.index < l.end && m.index + m[0].length > l.start)) continue;
+            links.push({
+              start: m.index,
+              end: m.index + m[0].length,
+              html: `<a class="bible-ref" href="${c.url}" target="_blank" rel="noopener noreferrer" title="${c.title}">${escapeHtml(m[0])}</a>`
+            });
+          }
+        }
+      }
+
+      // Bible refs
+      {
+        const tokenPattern = /((?:(?:1|2|3|I|II|III)\s+)?[A-Za-z]+(?:\s+[A-Za-z]+)?\.?\s+)?(\d+)(?::(\d+(?:\s*[-–—]\s*\d+)?(?:,\s*\d+(?:\s*[-–—]\s*\d+)*)?))?/g;
+        let lastSlug = null;
+        let lastDisplay = null;
+        let m;
+        while ((m = tokenPattern.exec(plain)) !== null) {
+          if (links.some(l => m.index < l.end && m.index + m[0].length > l.start)) continue;
+
+          const bookPart = m[1];
+          const chapter = m[2];
+          const verses = m[3];
+
+          if (bookPart) {
+            const fullBook = bookPart.replace(/\./g, "").replace(/\s+/g, " ").trim();
+            if (/^(ccc|st|sth|summa)$/i.test(fullBook)) {
+              lastSlug = null;
+              lastDisplay = null;
+              continue;
+            }
+            const slug = bookSlug(fullBook);
+            if (!slug) {
+              lastSlug = null;
+              lastDisplay = null;
+              continue;
+            }
+            lastSlug = slug;
+            lastDisplay = BIBLE_DISPLAY[slug] || fullBook;
+          } else if (!lastSlug) {
+            continue;
+          }
+          if (!lastSlug || !chapter) continue;
+
+          let passage = lastDisplay + " " + chapter;
+          if (verses) {
+            passage += ":" + verses.replace(/\s*[-–—]\s*/g, "-").replace(/\s*,\s*/g, ",");
+          }
+          const url = "https://www.biblegateway.com/passage/?search=" +
+            encodeURIComponent(passage) + "&version=RSVCE";
+          links.push({
+            start: m.index,
+            end: m.index + m[0].length,
+            html: `<a class="bible-ref" href="${url}" target="_blank" rel="noopener noreferrer" title="Open RSVCE on Bible Gateway">${escapeHtml(m[0])}</a>`
+          });
+        }
+      }
+
+      // Build output: escape plain segments, insert link HTML
+      links.sort((a, b) => a.start - b.start);
+      let out = "";
+      let cursor = 0;
+      for (const l of links) {
+        if (l.start < cursor) continue; // overlapping — skip
+        out += escapeHtml(plain.slice(cursor, l.start));
+        out += l.html;
+        cursor = l.end;
+      }
+      out += escapeHtml(plain.slice(cursor));
+      return out;
+    }
+
+    searchInput.addEventListener("input", e => buildNav(e.target.value));
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.dataset.theme === "dark";
+      html.dataset.theme = isDark ? "" : "dark";
+      const btn = document.getElementById("themeBtn");
+      if (btn) btn.textContent = isDark ? "Dark mode" : "Light mode";
+    }
+    function openMenu() {
+      document.getElementById("sidebar").classList.add("open");
+      document.getElementById("overlay").classList.add("show");
+    }
+    function closeMenu() {
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("overlay").classList.remove("show");
+    }
+
+    // ========== EDITOR ==========
+    function updateCategoryList(selected) {
+      const sel = document.getElementById("fCategorySelect");
+      const cats = [...new Set(argData.map(a => a.category))].sort();
+      let html = `<option value="">— Select a category —</option>`;
+      cats.forEach(c => {
+        html += `<option value="${escapeHtml(c)}"${selected === c ? " selected" : ""}>${escapeHtml(c)}</option>`;
+      });
+      html += `<option value="__new__">＋ New category…</option>`;
+      sel.innerHTML = html;
+      if (selected && !cats.includes(selected)) {
+        // editing an argument whose category was deleted? keep it selectable
+        sel.innerHTML = `<option value="${escapeHtml(selected)}" selected>${escapeHtml(selected)}</option>` + sel.innerHTML;
+      }
+      onCategoryChange();
+    }
+
+    function onCategoryChange() {
+      const sel = document.getElementById("fCategorySelect");
+      const newInput = document.getElementById("fCategoryNew");
+      if (sel.value === "__new__") {
+        newInput.style.display = "block";
+        newInput.required = true;
+        newInput.focus();
+      } else {
+        newInput.style.display = "none";
+        newInput.required = false;
+        newInput.value = "";
+      }
+    }
+
+    function getSelectedCategory() {
+      const sel = document.getElementById("fCategorySelect");
+      if (sel.value === "__new__") {
+        return document.getElementById("fCategoryNew").value.trim();
+      }
+      return sel.value.trim();
+    }
+
+    function openEditor(editId = null) {
+      if (!isAdmin()) {
+        alert("Admin access required.");
+        return;
+      }
+      document.getElementById("editorTitle").textContent = editId ? "Edit Argument" : "Add Argument";
+      document.getElementById("editId").value = editId || "";
+      document.getElementById("pointsList").innerHTML = "";
+      document.getElementById("objectionsList").innerHTML = "";
+
+      if (editId) {
+        const a = argData.find(x => x.id === editId);
+        if (!a) return;
+        updateCategoryList(a.category);
+        document.getElementById("fTitle").value = a.title;
+        document.getElementById("fRefs").value = a.refs || "";
+        document.getElementById("fSummary").value = a.summary;
+        (a.points || []).forEach(p => addPointRow(p));
+        (a.objections || []).forEach(o => addObjectionRow(o.obj, o.reply));
+        if (!(a.points || []).length) addPointRow();
+        if (!(a.objections || []).length) addObjectionRow();
+      } else {
+        updateCategoryList();
+        document.getElementById("fTitle").value = "";
+        document.getElementById("fRefs").value = "";
+        document.getElementById("fSummary").value = "";
+        document.getElementById("fCategoryNew").value = "";
+        addPointRow();
+        addPointRow();
+        addObjectionRow();
+      }
+      document.getElementById("editorModal").classList.add("show");
+    }
+
+    function closeEditor() {
+      document.getElementById("editorModal").classList.remove("show");
+    }
+
+    function addPointRow(value = "") {
+      const list = document.getElementById("pointsList");
+      const row = document.createElement("div");
+      row.className = "point-row";
+      row.innerHTML = `
+        <textarea placeholder="Write one key point…">${escapeHtml(value)}</textarea>
+        <button type="button" onclick="this.parentElement.remove()">✕</button>
+      `;
+      list.appendChild(row);
+    }
+
+    function addObjectionRow(obj = "", reply = "") {
+      const list = document.getElementById("objectionsList");
+      const row = document.createElement("div");
+      row.className = "obj-row";
+      row.innerHTML = `
+        <div style="flex:1;display:flex;flex-direction:column;gap:0.3rem">
+          <textarea placeholder="Objection…">${escapeHtml(obj)}</textarea>
+          <textarea placeholder="Reply…">${escapeHtml(reply)}</textarea>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()">✕</button>
+      `;
+      list.appendChild(row);
+    }
+
+    function saveArgument(e) {
+      e.preventDefault();
+      const id = document.getElementById("editId").value;
+      const category = getSelectedCategory();
+      const title = document.getElementById("fTitle").value.trim();
+      const refs = document.getElementById("fRefs").value.trim();
+      const summary = document.getElementById("fSummary").value.trim();
+
+      const points = [...document.querySelectorAll("#pointsList textarea")]
+        .map(t => t.value.trim())
+        .filter(Boolean);
+
+      const objections = [];
+      document.querySelectorAll("#objectionsList .obj-row").forEach(row => {
+        const texts = row.querySelectorAll("textarea");
+        const obj = texts[0].value.trim();
+        const reply = texts[1].value.trim();
+        if (obj || reply) objections.push({ obj, reply });
+      });
+
+      if (!category || !title || !summary) {
+        alert("Please fill in Category, Title, and Summary.");
+        return;
+      }
+      if (!points.length) {
+        alert("Please add at least one Key Point.");
+        return;
+      }
+
+      if (id) {
+        const idx = argData.findIndex(x => x.id === id);
+        if (idx >= 0) {
+          argData[idx] = { id, category, title, refs, summary, points, objections };
+        }
+      } else {
+        const newId = "arg-" + Date.now();
+        argData.push({ id: newId, category, title, refs, summary, points, objections });
+      }
+
+      saveData();
+      buildNav(searchInput.value);
+      closeEditor();
+      selectArg(id || argData[argData.length - 1].id);
+    }
+
+    function editArgument(id) {
+      if (!isAdmin()) return;
+      openEditor(id);
+    }
+
+    function deleteArgument(id) {
+      if (!isAdmin()) return;
+      if (!confirm("Delete this argument permanently?")) return;
+      argData = argData.filter(a => a.id !== id);
+      saveData();
+      buildNav(searchInput.value);
+      content.innerHTML = `<div class="empty">Argument deleted.<br><small>Select another or add a new one.</small></div>`;
+    }
+
+    // ========== DATA TOOLS ==========
+    function openDataTools() {
+      if (!isAdmin()) {
+        alert("Admin access required.");
+        return;
+      }
+      document.getElementById("dataModal").classList.add("show");
+    }
+    function closeDataTools() {
+      document.getElementById("dataModal").classList.remove("show");
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(argData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "biblical-arguments-backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Bake current arguments into a downloadable HTML file for GitHub Pages
+    async function publishPublicSite() {
+      if (!isAdmin()) {
+        alert("Admin access required.");
+        return;
+      }
+      const dataBlock =
+        "    // @@DATA_START@@\n" +
+        "    const defaultData = " + JSON.stringify(argData, null, 2).replace(/\n/g, "\n    ") + ";\n" +
+        "    // @@DATA_END@@";
+
+      let html = null;
+      try {
+        // Works when the site is served over http(s), e.g. GitHub Pages
+        const res = await fetch(location.href, { cache: "no-store" });
+        if (res.ok) html = await res.text();
+      } catch (e) {}
+
+      if (!html) {
+        alert(
+          "Could not read the page source automatically (common when opening the file directly from your computer).\n\n" +
+          "Workaround:\n" +
+          "1. Download a JSON backup with the button below.\n" +
+          "2. Open the site from your GitHub Pages URL instead, unlock Admin, then use Publish again.\n\n" +
+          "Or ask for help replacing the data in the HTML file."
+        );
+        return;
+      }
+
+      const start = html.indexOf("// @@DATA_START@@");
+      const end = html.indexOf("// @@DATA_END@@");
+      if (start === -1 || end === -1) {
+        alert("Could not find the data section in the page. The file may have been modified.");
+        return;
+      }
+      const endLine = html.indexOf("\n", end);
+      const newHtml =
+        html.slice(0, start) +
+        dataBlock +
+        html.slice(endLine === -1 ? end + "// @@DATA_END@@".length : endLine);
+
+      const blob = new Blob([newHtml], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "index.html";
+      a.click();
+      URL.revokeObjectURL(url);
+
+      alert(
+        "Downloaded index.html with your current arguments.\n\n" +
+        "Next steps:\n" +
+        "1. In your GitHub repo, replace the existing index.html with this file\n" +
+        "2. Commit and push\n" +
+        "3. Wait 1–2 minutes for GitHub Pages to update\n\n" +
+        "After that, everyone visiting the public site will see the new arguments."
+      );
+      closeDataTools();
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!Array.isArray(data)) throw new Error("Invalid format");
+          if (!confirm(`Load ${data.length} arguments from this file? This will replace your current list.`)) return;
+          argData = data;
+          saveData();
+          buildNav();
+          content.innerHTML = `<div class="empty">Backup loaded successfully.<br><small>Select an argument from the sidebar.</small></div>`;
+          closeDataTools();
+        } catch (err) {
+          alert("Could not read that file. Make sure it is a valid backup JSON.");
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    }
+
+    function resetToDefaults() {
+      if (!confirm("Reset to the original sample arguments? Your custom changes will be lost (unless you downloaded a backup).")) return;
+      argData = JSON.parse(JSON.stringify(defaultData));
+      saveData();
+      buildNav();
+      content.innerHTML = `<div class="empty">Reset to original samples.<br><small>Select an argument from the sidebar.</small></div>`;
+      closeDataTools();
+    }
+
+    // ========== INIT ==========
+    loadData();
+    buildNav();
+    initFirebase();
+    if (auth) {
+      auth.onAuthStateChanged(() => updateAdminUI());
+    } else {
+      updateAdminUI();
+    }
+    startFirebaseSync();
+  </script>
+</body>
+</html>
