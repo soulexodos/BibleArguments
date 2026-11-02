@@ -613,6 +613,24 @@
         padding: 1.3rem 1.2rem;
         border-radius: 8px;
       }
+      /* Avoid copy-link overlapping Edit/Delete on small screens */
+      .card > .copy-link-btn {
+        position: static;
+        align-self: flex-end;
+        margin: 0 0 0.65rem;
+        order: -1;
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+      }
+      .card h1 {
+        padding-right: 0;
+      }
+      .card-header-actions {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+      }
       h1 { font-size: 1.45rem; }
       .summary { font-size: 1rem; }
       .arg-item { padding: 0.85rem 1.2rem 0.85rem 1.8rem; }
